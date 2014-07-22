@@ -287,6 +287,7 @@ public class LessBadApp extends JFrame
             // true to append, false to write a new file
             PrintWriter p = new PrintWriter(new BufferedWriter(new FileWriter(pathToDesktop, true)));
             writeSystemInformation(dateFormat, p, message);
+            p.println("------------------------------------------------------- \n");
             p.close();
         } catch (IOException ioe)
         {
