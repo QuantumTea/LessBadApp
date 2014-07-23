@@ -6,7 +6,9 @@ package io.fictional.qa;
  * App closes randomly, leaving log file with a stack trace on the desktop
  * Message popup is misspelled
  * Exit button always fails the first time and works 40% of the time after that
- * When the exit button fails, the app gets wider
+ * Exit button may randomly minimise the app, but not close it
+ * When the exit button fails, the app gets wider or taller
+ * Dialogs have buttons and input fields that make no sense
  */
 
 import javax.swing.*;
@@ -21,16 +23,22 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class LessBadApp extends JFrame
+class LessBadApp extends JFrame
 {
     private static int failedCloseAttemptsCounter = 0;
+    private static int minimisedInsteadOfClosedCounter = 0;
     private static JLabel failedCloseAttemptsLabel;
     private static int timeToFatalException = 0;
-    private static int survivedExceptionAttempts = 0;
+    private static int survivedExceptionAttemptsCounter = 0;
     private static double finalRandomNumber = 0;
-    private static String lineSeparator = System.getProperty("line.separator");
+    private final static String systemLineSeparator = System.getProperty("line.separator");
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss a");
+    private final String pathToDesktop = System.getProperty("user.home")
+            + System.getProperty("file.separator") + "Desktop"
+            + System.getProperty("file.separator") + "LessBadApp error log.txt";
+    private PrintWriter printWriter;
 
-    public LessBadApp()
+    private LessBadApp()
     {
         super("Welcome to the LessBadApp");
         ConstructContentPane();
@@ -147,26 +155,7 @@ public class LessBadApp extends JFrame
 
     private void dealWithException(Exception exception)
     {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss a");
-        String pathToDesktop = System.getProperty("user.home")
-                + System.getProperty("file.separator") + "Desktop"
-                + System.getProperty("file.separator") + "LessBadApp error log.txt";
-
-        try
-        {
-            // true to append, false to write a new file
-            PrintWriter printWriter = new PrintWriter(new BufferedWriter(new FileWriter(pathToDesktop, true)));
-            writeSystemInformation(dateFormat, printWriter, "*the sound of crickets chirping*");
-            exception.printStackTrace(printWriter);
-            printWriter.println("------------------------------------------------------- \n");
-            printWriter.close();
-        } catch (IOException ioException)
-        {
-            System.out.println("IOException, log file not written");
-            ioException.printStackTrace();
-            exception.printStackTrace();
-        }
-
+        writeErrorLog(exception);
         System.exit(0);
     }
 
@@ -177,7 +166,7 @@ public class LessBadApp extends JFrame
         // throws exception 5% of the time and goes off every five seconds
         if (randomNumber < 0.95)
         {
-            survivedExceptionAttempts++;
+            survivedExceptionAttemptsCounter++;
         } else
         {
             finalRandomNumber = randomNumber;
@@ -210,7 +199,7 @@ public class LessBadApp extends JFrame
         failedCloseAttemptsCounter++;
         if (failedCloseAttemptsCounter == 23)
         {
-            writeErrorLog("Maximum close attempts reached, exiting");
+            writeErrorLog("Close attempts exceeds maximum safe level, exiting");
             System.exit(0);
         }
     }
@@ -224,9 +213,11 @@ public class LessBadApp extends JFrame
             return true;
         }
 
-        if (GetRandomNumber() < 0.06)
+        if (GetRandomNumber() < 0.05)
         {
+            // small chance of minimising the app instead of closing it
             this.setState(Frame.ICONIFIED);
+            minimisedInsteadOfClosedCounter++;
         }
         return false;
     }
@@ -276,19 +267,13 @@ public class LessBadApp extends JFrame
 
     private void writeErrorLog(String message)
     {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss a");
-        String pathToDesktop = System.getProperty("user.home")
-                + System.getProperty("file.separator")
-                + "Desktop" + System.getProperty("file.separator")
-                + "LessBadApp error log.txt";
-
         try
         {
             // true to append, false to write a new file
-            PrintWriter p = new PrintWriter(new BufferedWriter(new FileWriter(pathToDesktop, true)));
-            writeSystemInformation(dateFormat, p, message);
-            p.println("------------------------------------------------------- \n");
-            p.close();
+            printWriter = new PrintWriter(new BufferedWriter(new FileWriter(pathToDesktop, true)));
+            writeSystemInformation(dateFormat, printWriter, message);
+            printWriter.println("-------------------------------------------------------");
+            printWriter.close();
         } catch (IOException ioe)
         {
             System.out.println("IOException, log file not written");
@@ -296,30 +281,47 @@ public class LessBadApp extends JFrame
         }
     }
 
-    private void writeSystemInformation(DateFormat dateFormat, PrintWriter p, String message)
+    private void writeErrorLog(Exception exception)
     {
-        p.println("*** Errror log for LessBadApp: " + "Something went wrong, but not horribly wrong");
+        try
+        {
+            printWriter = new PrintWriter(new BufferedWriter(new FileWriter(pathToDesktop, true)));
+            writeSystemInformation(dateFormat, printWriter, "*the exceptional sound of crickets chirping*");
+            exception.printStackTrace(printWriter);
+            printWriter.println("-------------------------------------------------------");
+            printWriter.close();
+        } catch (IOException ioe)
+        {
+            System.out.println("IOException, log file not written");
+            ioe.printStackTrace();
+        }
+    }
+
+    private void writeSystemInformation(DateFormat dateFormat, PrintWriter printWriter, String message)
+    {
+        printWriter.println("*** Errror log for LessBadApp: " + "Something went wrong, but not horribly wrong");
         // intentional spelling error, even in the stack trace
-        p.println("Current system time is: " + dateFormat.format(new Date()));
-        p.println("Number of failed exit attempts was " + failedCloseAttemptsCounter
-                + lineSeparator);
+        printWriter.println("Current system time is: " + dateFormat.format(new Date()));
+        printWriter.println("Number of failed exit attempts was " + failedCloseAttemptsCounter);
+        printWriter.println("Minimised instead of closing " + minimisedInsteadOfClosedCounter + " times"
+                + systemLineSeparator);
 
-        p.println("Additional system message: " + message + lineSeparator);
+        printWriter.println("Additional system message: " + message + systemLineSeparator);
 
-        p.println("Time from launch to fatal exception was " + timeToFatalException + " seconds.");
-        p.println("Survived exception " + survivedExceptionAttempts + " time(s)");
-        p.println("Final random number was: " + finalRandomNumber
-                + lineSeparator);
+        printWriter.println("Time from launch to fatal exception was " + timeToFatalException + " seconds.");
+        printWriter.println("Survived exception " + survivedExceptionAttemptsCounter + " time(s)");
+        printWriter.println("Final random number was: " + finalRandomNumber
+                + systemLineSeparator);
 
-        p.println("The logged in user is " + System.getProperty("user.name"));
-        p.println("IntentionallyBadApp was running on " + System.getProperty("os.name"));
-        p.println("Operating system architecture is " + System.getProperty("os.arch")
-                + lineSeparator);
+        printWriter.println("The logged in user is " + System.getProperty("user.name"));
+        printWriter.println("IntentionallyBadApp was running on " + System.getProperty("os.name"));
+        printWriter.println("Operating system architecture is " + System.getProperty("os.arch")
+                + systemLineSeparator);
 
-        p.println("Java version is " + System.getProperty("java.version"));
-        p.println("Java Virtual Machine version is " + System.getProperty("java.vm.version"));
-        p.println("Java Runtime Environment version is " + System.getProperty("java.specification.version"));
-        p.println("Java vendor is " + System.getProperty("java.vendor")
-                + lineSeparator);
+        printWriter.println("Java version is " + System.getProperty("java.version"));
+        printWriter.println("Java Virtual Machine version is " + System.getProperty("java.vm.version"));
+        printWriter.println("Java Runtime Environment version is " + System.getProperty("java.specification.version"));
+        printWriter.println("Java vendor is " + System.getProperty("java.vendor")
+                + systemLineSeparator);
     }
 }
