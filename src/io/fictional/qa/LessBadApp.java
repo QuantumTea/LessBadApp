@@ -23,7 +23,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-class LessBadApp extends JFrame {
+class LessBadApp extends JFrame
+{
     private static int failedCloseAttemptsCounter = 0;
     private static int minimisedInsteadOfClosedCounter = 0;
     private static JLabel failedCloseAttemptsLabel;
@@ -36,7 +37,6 @@ class LessBadApp extends JFrame {
             + System.getProperty("file.separator") + "Desktop"
             + System.getProperty("file.separator") + "LessBadApp error log.txt";
     private PrintWriter printWriter;
-    private long startTimeStamp;
 
     private LessBadApp()
     {
@@ -44,7 +44,6 @@ class LessBadApp extends JFrame {
         ConstructContentPane();
         GenerateMenuBar();
         SetUpTimerToGenerateExceptions();
-        startTimeStamp = System.currentTimeMillis();
     }
 
     public static void main(String[] args)
@@ -200,20 +199,16 @@ class LessBadApp extends JFrame {
         failedCloseAttemptsCounter++;
         if (failedCloseAttemptsCounter == 23)
         {
-            writeErrorLog("Close attempts exceeds maximum safe level. Exiting at " + getEndTimeStamp() + " seconds.");
+            writeErrorLog("Close attempts exceeds maximum safe level, exiting");
             System.exit(0);
         }
-    }
-
-    private long getEndTimeStamp() {
-        return (System.currentTimeMillis() - startTimeStamp) / 1000;
     }
 
     private boolean Fail60PercentOfTime()
     {
         if (GetRandomNumber() < 0.04)
         {
-            writeErrorLog("The exit button worked as designed, mostly. Exiting at " + getEndTimeStamp() + " seconds.");
+            writeErrorLog("The exit button worked as designed, mostly.");
             System.exit(0);
             return true;
         }
@@ -288,19 +283,22 @@ class LessBadApp extends JFrame {
 
     private void writeErrorLog(Exception exception)
     {
-        try {
+        try
+        {
             printWriter = new PrintWriter(new BufferedWriter(new FileWriter(pathToDesktop, true)));
-            writeSystemInformation(dateFormat, printWriter, "*the exceptional sound of crickets chirping* Exiting at " + getEndTimeStamp() + " seconds.");
+            writeSystemInformation(dateFormat, printWriter, "*the exceptional sound of crickets chirping*");
             exception.printStackTrace(printWriter);
             printWriter.println("-------------------------------------------------------");
             printWriter.close();
-        } catch (IOException ioe) {
+        } catch (IOException ioe)
+        {
             System.out.println("IOException, log file not written");
             ioe.printStackTrace();
         }
     }
 
-    private void writeSystemInformation(DateFormat dateFormat, PrintWriter printWriter, String message) {
+    private void writeSystemInformation(DateFormat dateFormat, PrintWriter printWriter, String message)
+    {
         printWriter.println("*** Errror log for LessBadApp: " + "Something went wrong, but not horribly wrong");
         // intentional spelling error, even in the stack trace
         printWriter.println("Current system time is: " + dateFormat.format(new Date()));
@@ -312,11 +310,12 @@ class LessBadApp extends JFrame {
 
         printWriter.println("Time from launch to fatal exception was " + timeToFatalException + " seconds.");
         printWriter.println("Survived exception " + survivedExceptionAttemptsCounter + " time(s)");
-        printWriter.println("Final random number was: " + finalRandomNumber
-                + systemLineSeparator);
+        if (finalRandomNumber != 0.0)
+            printWriter.println("Final random number was: " + finalRandomNumber);
+        printWriter.println();
 
         printWriter.println("The logged in user is " + System.getProperty("user.name"));
-        printWriter.println("LessBadApp was running on " + System.getProperty("os.name"));
+        printWriter.println("IntentionallyBadApp was running on " + System.getProperty("os.name"));
         printWriter.println("Operating system architecture is " + System.getProperty("os.arch")
                 + systemLineSeparator);
 
