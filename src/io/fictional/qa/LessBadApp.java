@@ -138,7 +138,7 @@ class LessBadApp extends JFrame
 
     private void launchMisspelledMessagePopup()
     {
-        JOptionPane.showInputDialog(this, "You launched a messege window, well done.", "Alart!", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showInputDialog(this, "You launched a messege widow, well done.", "Alart!", JOptionPane.ERROR_MESSAGE);
     }
 
     private void displayAboutBox()
@@ -176,7 +176,6 @@ class LessBadApp extends JFrame
 
     private void AttemptToCloseTheApp()
     {
-
         if (FailFirstTwoCloseAttemptsWhenCounterIsOneOrTwo()) return;
         if (Fail60PercentOfTime()) return;
         IncrementCounterToLimitOf23();
@@ -230,7 +229,7 @@ class LessBadApp extends JFrame
 
     private boolean FailFirstTwoCloseAttemptsWhenCounterIsOneOrTwo()
     {
-        if ((failedCloseAttemptsCounter == 0) || (failedCloseAttemptsCounter == 1))
+        if (failedCloseAttemptsCounter < 2 )
         {
             FailTheFirstTwoCloseAttempts();
             return true;
@@ -252,17 +251,17 @@ class LessBadApp extends JFrame
         SetFailedCloseAttemptsLabel();
     }
 
-    private void SetFailedCloseAttemptsLabel()
-    {
-        failedCloseAttemptsLabel.setText("    Failed attempts to close this window: " + failedCloseAttemptsCounter);
-    }
-
     private void MakeTheWindowWider()
     {
         int newWidth = this.getWidth() + 50;
         int oldHeight = this.getHeight();
         this.setSize(newWidth, oldHeight);
         SetFailedCloseAttemptsLabel();
+    }
+
+    private void SetFailedCloseAttemptsLabel()
+    {
+        failedCloseAttemptsLabel.setText("    Failed attempts to close this window: " + failedCloseAttemptsCounter);
     }
 
     private void writeErrorLog(String message)
