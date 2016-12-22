@@ -1,6 +1,6 @@
 package io.fictional.qa;
 
-/**
+/*
  * Description: This is an intentionally buggy program for QA training in exploratory testing.
  * The Close button (top right red X or circle) doesn't work
  * App closes randomly, leaving log file with a stack trace on the desktop
@@ -221,7 +221,7 @@ class LessBadApp extends JFrame
         return false;
     }
 
-    double GetRandomNumber()
+    private double GetRandomNumber()
     {
         // Returns a number between 0.0 and 0.1
         return Math.random();
