@@ -314,7 +314,7 @@ class LessBadApp extends JFrame
         printWriter.println();
 
         printWriter.println("The logged in user is " + System.getProperty("user.name"));
-        printWriter.println("IntentionallyBadApp was running on " + System.getProperty("os.name"));
+        printWriter.println("LessBadApp was running on " + System.getProperty("os.name"));
         printWriter.println("Operating system architecture is " + System.getProperty("os.arch")
                 + systemLineSeparator);
 
